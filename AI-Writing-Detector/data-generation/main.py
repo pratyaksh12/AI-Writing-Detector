@@ -15,8 +15,8 @@ if(not api_key):
 
 CLIENT = OpenAI(api_key=api_key)
 
-INPUT_FILE: str = "AI-Writing-Detector/scraping/human_text_pre2022.jsonl"
-OUTPUT_FILE: str = "ai_generated_text.jsonl"
+INPUT_FILE: str = "AI-Writing-Detector/data/human_text_pre2022.jsonl"
+OUTPUT_FILE: str = "AI-Writing-Detector/data/ai_generated_text.jsonl"
 MODEL: str = "gpt-5-nano" #cheapest model right now
 
 def generate_rewrite(text: str) -> Optional[str]:
@@ -26,7 +26,7 @@ def generate_rewrite(text: str) -> Optional[str]:
             model=MODEL,
             messages=[
                 {"role": "system", "content": "You are a professional summarizer who summarizes long text to small paragraphs of no more than 30 words without losing the original paragraphs meaning"},
-                {"role": "user", "content":"Summarize this paragraph for me please make sure to retain important context and meaning. Make it like 2 sentence max. The response should only consist of the summarized text and nothing else."}
+                {"role": "user", "content": f"Summarize this paragraph for me please make sure to retain important context and meaning. Make it like 2 sentence max. The response should only consist of the summarized text and nothing else. \n\n Text: {text}"}
             ]
         )
         
@@ -38,7 +38,7 @@ def generate_rewrite(text: str) -> Optional[str]:
             model=MODEL,
             messages=[
                 {"role": "system", "content":"You are a professional writer and you are to write a paragraph out of a summarized text. Make sure to retain the context and message that is being conveyed."},
-                {"role":"user", "content":"Plase expand this summarized text for me please. The response should only consist of the paragraph and nothing else."}
+                {"role":"user", "content": f"Please expand this summarized text for me please. The response should only consist of the paragraph and nothing else. \n\n Summary: {summary}"}
             ]
         )
         
@@ -51,13 +51,15 @@ def generate_rewrite(text: str) -> Optional[str]:
         
         return None
 def main():
-    print("Reading input files")
+    print("Reading input files...")
+    print(f"Looking for input at: {INPUT_FILE}")
     
     if not os.path.exists(INPUT_FILE):
-        print("INPUT FILE PATH Doesn't exist")
+        print(f"ERROR: INPUT FILE PATH Doesn't exist at {INPUT_FILE}")
         return
     
     total_lines: int = sum(1 for _ in open(INPUT_FILE, "r", encoding="utf-8"))
+    print(f"Found {total_lines} lines. Starting generation...")
     processed: int = 0
     
     

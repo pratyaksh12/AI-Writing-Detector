@@ -15,4 +15,3 @@ run.log
 
 # Data Files (We don't want to commit the dataset)
 *.jsonl
-data/
